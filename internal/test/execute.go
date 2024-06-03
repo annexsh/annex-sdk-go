@@ -3,7 +3,6 @@ package test
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	testv1 "github.com/annexhq/annex-proto/gen/go/type/test/v1"
 	"github.com/annexhq/annex/test"
@@ -25,10 +24,6 @@ func ExecuteTest(ctx workflow.Context, wf func(ctx workflow.Context)) error {
 		TestExecID: testExecID,
 	})
 
-	startCh := workflow.GetSignalChannel(ctx, testv1.TestSignal_TEST_SIGNAL_START_TEST.String())
-	if ok, _ := startCh.ReceiveWithTimeout(ctx, 30*time.Second, nil); !ok {
-		return errors.New("did not receive a start test signal before timeout")
-	}
 	return execWithRecover(func() {
 		wf(ctx)
 	})
