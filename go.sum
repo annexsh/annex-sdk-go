@@ -2,8 +2,8 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/annexhq/annex v0.0.0-20240530212531-fe027cbf10b2 h1:67mGpMJK01fqQC7f/WPWxH7+DY75T0FDBnvPILt43/c=
 github.com/annexhq/annex v0.0.0-20240530212531-fe027cbf10b2/go.mod h1:SZ7ihQLIMhQWVNnUHus2X9k5wr1TQoSIj2y+DzCmq4Y=
-github.com/annexhq/annex-proto v0.0.0-20240530212352-3ca8e8531454 h1:6P9Y+tu4YY7M2xQqNXtPewDxFD9T1daJKW2eNrY7S78=
-github.com/annexhq/annex-proto v0.0.0-20240530212352-3ca8e8531454/go.mod h1:DSGBmFfVcqUeh9rVjHeZq9bFyZkSQ5MPdTFZ8X58X9E=
+github.com/annexhq/annex-proto v0.0.0-20240603062920-3b6f92e0f992 h1:xJ7liPSDhy4e7vCoG+4+ckWgRfij/I+w3MFNtzVYIUY=
+github.com/annexhq/annex-proto v0.0.0-20240603062920-3b6f92e0f992/go.mod h1:DSGBmFfVcqUeh9rVjHeZq9bFyZkSQ5MPdTFZ8X58X9E=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=

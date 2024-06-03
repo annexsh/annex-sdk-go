@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/annexhq/annex v0.0.0-20240530212531-fe027cbf10b2
-	github.com/annexhq/annex-proto v0.0.0-20240530212352-3ca8e8531454
+	github.com/annexhq/annex-proto v0.0.0-20240603062920-3b6f92e0f992
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/google/uuid v1.6.0
