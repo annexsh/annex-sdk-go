@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"reflect"
 
-	testservicev1 "github.com/annexhq/annex-proto/gen/go/rpc/testservice/v1"
-	testv1 "github.com/annexhq/annex-proto/gen/go/type/test/v1"
+	testservicev1 "github.com/annexsh/annex-proto/gen/go/rpc/testservice/v1"
+	testv1 "github.com/annexsh/annex-proto/gen/go/type/test/v1"
 	"github.com/denisbrodbeck/machineid"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/annexhq/annex-sdk-go/internal/temporal"
+	"github.com/annexsh/annex-sdk-go/internal/temporal"
 )
 
 const taskQueue = "default" // TODO: configurable

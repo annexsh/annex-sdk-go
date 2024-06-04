@@ -10,8 +10,8 @@ import (
 	temporalsdk "go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 
-	"github.com/annexhq/annex-sdk-go/internal/name"
-	"github.com/annexhq/annex-sdk-go/internal/test"
+	"github.com/annexsh/annex-sdk-go/internal/name"
+	"github.com/annexsh/annex-sdk-go/internal/test"
 )
 
 type CaseFunc func(ctx context.Context)

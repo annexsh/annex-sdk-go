@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/annexhq/annex/test"
+	"github.com/annexsh/annex/test"
 	"github.com/stretchr/testify/assert"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/workflow"

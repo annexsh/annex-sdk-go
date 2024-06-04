@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"reflect"
 
-	testv1 "github.com/annexhq/annex-proto/gen/go/type/test/v1"
+	testv1 "github.com/annexsh/annex-proto/gen/go/type/test/v1"
 	"go.temporal.io/api/common/v1"
 	"go.temporal.io/sdk/workflow"
 
-	"github.com/annexhq/annex-sdk-go/internal/name"
-	"github.com/annexhq/annex-sdk-go/internal/test"
-	"github.com/annexhq/annex-sdk-go/internal/testing"
+	"github.com/annexsh/annex-sdk-go/internal/name"
+	"github.com/annexsh/annex-sdk-go/internal/test"
+	"github.com/annexsh/annex-sdk-go/internal/testing"
 )
 
 type simpleTest struct {

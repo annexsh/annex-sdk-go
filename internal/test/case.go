@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/annexhq/annex/test"
+	"github.com/annexsh/annex/test"
 	"go.temporal.io/api/common/v1"
 	"go.temporal.io/sdk/activity"
 
-	"github.com/annexhq/annex-sdk-go/internal/temporal"
+	"github.com/annexsh/annex-sdk-go/internal/temporal"
 )
 
 type resultKey struct{}
