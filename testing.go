@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/annexhq/annex-sdk-go/internal/test"
-	"github.com/annexhq/annex-sdk-go/internal/testing"
+	"github.com/annexsh/annex-sdk-go/internal/test"
+	"github.com/annexsh/annex-sdk-go/internal/testing"
 )
 
 type TestT interface {

@@ -1,7 +1,7 @@
 package test
 
 import (
-	testv1 "github.com/annexhq/annex-proto/gen/go/type/test/v1"
+	testv1 "github.com/annexsh/annex-proto/gen/go/type/test/v1"
 	"go.temporal.io/api/common/v1"
 	"go.temporal.io/sdk/converter"
 )

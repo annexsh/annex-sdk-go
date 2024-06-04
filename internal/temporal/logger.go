@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	testservicev1 "github.com/annexhq/annex-proto/gen/go/rpc/testservice/v1"
-	"github.com/annexhq/annex/test"
+	testservicev1 "github.com/annexsh/annex-proto/gen/go/rpc/testservice/v1"
+	"github.com/annexsh/annex/test"
 	"github.com/google/uuid"
 	"go.temporal.io/sdk/activity"
 	tlog "go.temporal.io/sdk/log"

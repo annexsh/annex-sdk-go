@@ -3,7 +3,7 @@ package temporal
 import (
 	"context"
 
-	"github.com/annexhq/annex/test"
+	"github.com/annexsh/annex/test"
 	"go.temporal.io/sdk/workflow"
 )
 

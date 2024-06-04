@@ -3,7 +3,7 @@
 ## Installation
 
 ```
-go get github.com/annexhq/annex-sdk-go
+go get github.com/annexsh/annex-sdk-go
 ```
 
 ## Disclaimer

@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	testv1 "github.com/annexhq/annex-proto/gen/go/type/test/v1"
-	"github.com/annexhq/annex/test"
+	testv1 "github.com/annexsh/annex-proto/gen/go/type/test/v1"
+	"github.com/annexsh/annex/test"
 	"go.temporal.io/sdk/workflow"
 
-	"github.com/annexhq/annex-sdk-go/internal/temporal"
+	"github.com/annexsh/annex-sdk-go/internal/temporal"
 )
 
 type TestExecutor func(ctx workflow.Context, payload *testv1.Payload) error
