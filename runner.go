@@ -3,6 +3,7 @@ package annex
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	testservicev1 "github.com/annexsh/annex-proto/gen/go/rpc/testservice/v1"
@@ -19,7 +20,10 @@ import (
 	"github.com/annexsh/annex-sdk-go/internal/temporal"
 )
 
-const taskQueue = "default" // TODO: configurable
+const (
+	runnerContext = "default" // TODO: configurable
+	runnerGroup   = "default" // TODO: configurable
+)
 
 type Runner struct {
 	id              string
@@ -43,9 +47,14 @@ func NewRunner() (*Runner, error) {
 	}
 	annexClient := testservicev1.NewTestServiceClient(conn)
 
-	namespace := "default"
+	if _, err = annexClient.RegisterGroup(ctx, &testservicev1.RegisterGroupRequest{
+		Context: runnerContext,
+		Name:    runnerGroup,
+	}); err != nil {
+		return nil, err
+	}
 
-	temporalClient, err := temporal.NewClient(ctx, annexAddr, namespace)
+	temporalClient, err := temporal.NewClient(ctx, annexAddr, runnerContext)
 	if err != nil {
 		return nil, err
 	}
@@ -55,6 +64,7 @@ func NewRunner() (*Runner, error) {
 		return nil, err
 	}
 
+	taskQueue := getTaskQueue(runnerContext, runnerGroup)
 	base := worker.New(temporalClient, taskQueue, worker.Options{
 		DisableRegistrationAliasing: true,
 		Interceptors: []interceptor.WorkerInterceptor{
@@ -112,9 +122,8 @@ func (w *Runner) Run() error {
 		})
 
 		def := &testv1.TestDefinition{
-			Project:        taskQueue,
-			Name:           reg.name,
-			DefaultPayload: nil,
+			Name:         reg.name,
+			DefaultInput: nil,
 		}
 
 		if reg.defaultParam != nil {
@@ -122,9 +131,8 @@ func (w *Runner) Run() error {
 			if err != nil {
 				return err
 			}
-			def.DefaultPayload = &testv1.Payload{
-				Data:   data,
-				IsZero: true,
+			def.DefaultInput = &testv1.Payload{
+				Data: data,
 			}
 		}
 
@@ -132,15 +140,16 @@ func (w *Runner) Run() error {
 	}
 
 	regRes, err := w.annex.RegisterTests(w.ctx, &testservicev1.RegisterTestsRequest{
-		RunnerId:    w.id,
+		Context:     runnerContext,
+		Group:       runnerGroup,
 		Definitions: defs,
 	})
 	if err != nil {
 		return err
 	}
 
-	testIDs := make([]string, len(regRes.Registered))
-	for i, reg := range regRes.Registered {
+	testIDs := make([]string, len(regRes.Tests))
+	for i, reg := range regRes.Tests {
 		testIDs[i] = reg.Id
 	}
 
@@ -157,4 +166,8 @@ type registeredTest struct {
 	name         string
 	test         tester
 	defaultParam any
+}
+
+func getTaskQueue(context string, groupName string) string {
+	return fmt.Sprintf("%s-%s", context, groupName)
 }

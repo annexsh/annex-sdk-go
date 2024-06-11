@@ -131,16 +131,16 @@ func (l *TestActivityLogger) Error(msg string, keyvals ...any) {
 func (l *TestActivityLogger) log(level Level, msg string, keyvals []any) {
 	if !l.testExecID.IsEmpty() {
 		req := &testservicev1.PublishTestExecutionLogRequest{
-			TestExecId: l.testExecID.String(),
-			CaseExecId: nil,
-			Level:      string(level),
-			Message:    msg,
-			CreatedAt:  timestamppb.Now(),
+			TestExecutionId: l.testExecID.String(),
+			CaseExecutionId: nil,
+			Level:           string(level),
+			Message:         msg,
+			CreateTime:      timestamppb.Now(),
 		}
 
 		if l.caseExecID != nil {
 			cid32 := l.caseExecID.Int32()
-			req.CaseExecId = &cid32
+			req.CaseExecutionId = &cid32
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), logRequestTimeout)
@@ -187,10 +187,10 @@ func (t *TestLogActivity) Publish(ctx context.Context, req TestLogRequest) (*Tes
 	keyVals := req.GlobalKeyVals + strings.TrimSuffix(fmt.Sprintln(req.KeyVals...), "\n")
 
 	pubReq := &testservicev1.PublishTestExecutionLogRequest{
-		TestExecId: req.TestExecutionID.String(),
-		Level:      string(req.Level),
-		Message:    req.Message + " " + keyVals,
-		CreatedAt:  timestamppb.Now(),
+		TestExecutionId: req.TestExecutionID.String(),
+		Level:           string(req.Level),
+		Message:         req.Message + " " + keyVals,
+		CreateTime:      timestamppb.Now(),
 	}
 
 	res, err := t.pub.PublishTestExecutionLog(ctx, pubReq)
@@ -199,7 +199,7 @@ func (t *TestLogActivity) Publish(ctx context.Context, req TestLogRequest) (*Tes
 		logger.Error("failed to publish test log", kv...)
 	}
 
-	logID, err := uuid.Parse(res.Id)
+	logID, err := uuid.Parse(res.LogId)
 	if err != nil {
 		return nil, err
 	}
