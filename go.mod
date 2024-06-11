@@ -3,8 +3,8 @@ module github.com/annexsh/annex-sdk-go
 go 1.22.0
 
 require (
-	github.com/annexsh/annex v0.0.0-20240604141651-20f0440a3a87
-	github.com/annexsh/annex-proto v0.0.0-20240604135603-ff6a86059f03
+	github.com/annexsh/annex v0.0.0-20240611234527-4a16dcb728b9
+	github.com/annexsh/annex-proto v0.0.0-20240611232825-bec6cd17612d
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/google/uuid v1.6.0
@@ -12,7 +12,7 @@ require (
 	go.temporal.io/api v1.34.0
 	go.temporal.io/sdk v1.26.1
 	google.golang.org/grpc v1.64.0
-	google.golang.org/protobuf v1.34.1
+	google.golang.org/protobuf v1.34.2
 )
 
 require (
@@ -27,12 +27,12 @@ require (
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	golang.org/x/exp v0.0.0-20240530194437-404ba88c7ed0 // indirect
-	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/exp v0.0.0-20240604190554-fc45aab8b7f8 // indirect
+	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240528184218-531527333157 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240610135401-a8a62080eff3 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240610135401-a8a62080eff3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
