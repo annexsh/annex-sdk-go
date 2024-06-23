@@ -9,6 +9,8 @@ import (
 	"go.temporal.io/api/workflowservice/v1"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/converter"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func NewClient(ctx context.Context, hostPort string, namespace string) (client.Client, error) {
@@ -16,7 +18,10 @@ func NewClient(ctx context.Context, hostPort string, namespace string) (client.C
 		HostPort:      hostPort,
 		Namespace:     namespace,
 		DataConverter: converter.GetDefaultDataConverter(),
-		Logger:        NewLogger(),
+		ConnectionOptions: client.ConnectionOptions{
+			DialOptions: []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
+		},
+		Logger: NewLogger(),
 	})
 	if err != nil {
 		return nil, err

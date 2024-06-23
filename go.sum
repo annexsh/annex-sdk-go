@@ -1,9 +1,11 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
+connectrpc.com/connect v1.16.2 h1:ybd6y+ls7GOlb7Bh5C8+ghA6SvCBajHwxssO2CGFjqE=
+connectrpc.com/connect v1.16.2/go.mod h1:n2kgwskMHXC+lVqb18wngEpF95ldBHXjZYJussz5FRc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/annexsh/annex v0.0.0-20240611234527-4a16dcb728b9 h1:Hw4EGHAQKKHKDMqVeMYlVg+JrViQyCVi6tmPHlSEQ1I=
-github.com/annexsh/annex v0.0.0-20240611234527-4a16dcb728b9/go.mod h1:zZF1KKS4eefjGIsmZfngdss3F1o5Nagb3uRgZpH3VPw=
-github.com/annexsh/annex-proto v0.0.0-20240611232825-bec6cd17612d h1:eBQtC7dPPRoOPM9IXW/572D5DWwGQa8wXHNl/ee9IOw=
-github.com/annexsh/annex-proto v0.0.0-20240611232825-bec6cd17612d/go.mod h1:yxmzF5yk/8rLEKu5VRbsMo1jFHB4/RotPSFrzMSJW2U=
+github.com/annexsh/annex v0.0.0-20240623025614-cd7f1964e3b6 h1:DF/xPYl8rAQYUpLJaO5NoLxx7hzrHpX5BaR+T/lTNxc=
+github.com/annexsh/annex v0.0.0-20240623025614-cd7f1964e3b6/go.mod h1:SqGveC8bb0EZtPhmnEm71mX954H9DjNHk0ft92wUrOY=
+github.com/annexsh/annex-proto v0.0.0-20240623024904-02c7160f793e h1:JsPQmNrf1nJGBXb8IbCrz+08x/biS2oKrjQcndeUF9k=
+github.com/annexsh/annex-proto v0.0.0-20240623024904-02c7160f793e/go.mod h1:pzaEDW9K5m9D4MHE1RGlgBVcE525eaEdzNEGb0SMClc=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
