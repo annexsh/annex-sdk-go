@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"reflect"
 
-	testv1 "github.com/annexsh/annex-proto/gen/go/type/test/v1"
+	"github.com/annexsh/annex-proto/gen/go/annex/tests/v1"
 	"go.temporal.io/api/common/v1"
 	"go.temporal.io/sdk/workflow"
 
@@ -19,7 +19,7 @@ type simpleTest struct {
 	test func(t TestT)
 }
 
-func (f *simpleTest) workflow(ctx workflow.Context, payload *testv1.Payload) error {
+func (f *simpleTest) workflow(ctx workflow.Context, payload *testsv1.Payload) error {
 	if f.test == nil {
 		return errors.New("flow cannot be nil")
 	}
@@ -41,7 +41,7 @@ type paramTest[P any] struct {
 	test func(t TestT, param P)
 }
 
-func (f *paramTest[P]) workflow(ctx workflow.Context, payload *testv1.Payload) error {
+func (f *paramTest[P]) workflow(ctx workflow.Context, payload *testsv1.Payload) error {
 	if f.test == nil {
 		return errors.New("test cannot be nil")
 	}

@@ -1,12 +1,12 @@
 package test
 
 import (
-	testv1 "github.com/annexsh/annex-proto/gen/go/type/test/v1"
+	"github.com/annexsh/annex-proto/gen/go/annex/tests/v1"
 	"go.temporal.io/api/common/v1"
 	"go.temporal.io/sdk/converter"
 )
 
-func DecodeParam[P any](payload *testv1.Payload) (P, error) {
+func DecodeParam[P any](payload *testsv1.Payload) (P, error) {
 	converted := convertAnnexPayload(payload)
 	dc := converter.GetDefaultDataConverter()
 	var param P
@@ -25,7 +25,7 @@ func DecodeTemporalParam[P any](payload *common.Payload) (P, error) {
 	return param, nil
 }
 
-func convertAnnexPayload(testPayload *testv1.Payload) *common.Payload {
+func convertAnnexPayload(testPayload *testsv1.Payload) *common.Payload {
 	return &common.Payload{
 		Metadata: testPayload.Metadata,
 		Data:     testPayload.Data,

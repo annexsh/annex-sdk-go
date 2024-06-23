@@ -4,14 +4,14 @@ import (
 	"errors"
 	"fmt"
 
-	testv1 "github.com/annexsh/annex-proto/gen/go/type/test/v1"
+	"github.com/annexsh/annex-proto/gen/go/annex/tests/v1"
 	"github.com/annexsh/annex/test"
 	"go.temporal.io/sdk/workflow"
 
 	"github.com/annexsh/annex-sdk-go/internal/temporal"
 )
 
-type TestExecutor func(ctx workflow.Context, payload *testv1.Payload) error
+type TestExecutor func(ctx workflow.Context, payload *testsv1.Payload) error
 
 func ExecuteTest(ctx workflow.Context, wf func(ctx workflow.Context)) error {
 	weInfo := workflow.GetInfo(ctx)

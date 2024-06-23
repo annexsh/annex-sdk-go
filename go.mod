@@ -3,8 +3,9 @@ module github.com/annexsh/annex-sdk-go
 go 1.22.0
 
 require (
-	github.com/annexsh/annex v0.0.0-20240611234527-4a16dcb728b9
-	github.com/annexsh/annex-proto v0.0.0-20240611232825-bec6cd17612d
+	connectrpc.com/connect v1.16.2
+	github.com/annexsh/annex v0.0.0-20240623025614-cd7f1964e3b6
+	github.com/annexsh/annex-proto v0.0.0-20240623024904-02c7160f793e
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/google/uuid v1.6.0

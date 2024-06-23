@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
-	testservicev1 "github.com/annexsh/annex-proto/gen/go/rpc/testservice/v1"
+	"connectrpc.com/connect"
+	"github.com/annexsh/annex-proto/gen/go/annex/tests/v1"
 	"github.com/annexsh/annex/test"
 	"github.com/google/uuid"
 	"go.temporal.io/sdk/activity"
 	tlog "go.temporal.io/sdk/log"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -81,7 +81,10 @@ func (l *Logger) log(level Level, msg string, keyvals ...any) {
 var _ tlog.Logger = (*TestActivityLogger)(nil)
 
 type LogPublisher interface {
-	PublishTestExecutionLog(ctx context.Context, in *testservicev1.PublishTestExecutionLogRequest, opts ...grpc.CallOption) (*testservicev1.PublishTestExecutionLogResponse, error)
+	PublishTestExecutionLog(
+		ctx context.Context,
+		req *connect.Request[testsv1.PublishTestExecutionLogRequest],
+	) (*connect.Response[testsv1.PublishTestExecutionLogResponse], error)
 }
 
 type CaseOption func(logger *TestActivityLogger)
@@ -130,7 +133,7 @@ func (l *TestActivityLogger) Error(msg string, keyvals ...any) {
 
 func (l *TestActivityLogger) log(level Level, msg string, keyvals []any) {
 	if !l.testExecID.IsEmpty() {
-		req := &testservicev1.PublishTestExecutionLogRequest{
+		req := &testsv1.PublishTestExecutionLogRequest{
 			TestExecutionId: l.testExecID.String(),
 			CaseExecutionId: nil,
 			Level:           string(level),
@@ -145,7 +148,7 @@ func (l *TestActivityLogger) log(level Level, msg string, keyvals []any) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), logRequestTimeout)
 		defer cancel()
-		if _, err := l.pub.PublishTestExecutionLog(ctx, req); err != nil {
+		if _, err := l.pub.PublishTestExecutionLog(ctx, connect.NewRequest(req)); err != nil {
 			kv := append(keyvals, "error", err)
 			l.Logger.Error("failed to publish log", kv...)
 		}
@@ -186,20 +189,20 @@ func (t *TestLogActivity) Publish(ctx context.Context, req TestLogRequest) (*Tes
 
 	keyVals := req.GlobalKeyVals + strings.TrimSuffix(fmt.Sprintln(req.KeyVals...), "\n")
 
-	pubReq := &testservicev1.PublishTestExecutionLogRequest{
+	pubReq := &testsv1.PublishTestExecutionLogRequest{
 		TestExecutionId: req.TestExecutionID.String(),
 		Level:           string(req.Level),
 		Message:         req.Message + " " + keyVals,
-		CreateTime:      timestamppb.Now(),
+		CreateTime:      timestamppb.New(time.Now().UTC()),
 	}
 
-	res, err := t.pub.PublishTestExecutionLog(ctx, pubReq)
+	res, err := t.pub.PublishTestExecutionLog(ctx, connect.NewRequest(pubReq))
 	if err != nil {
 		kv := append(req.KeyVals, "error", err)
 		logger.Error("failed to publish test log", kv...)
 	}
 
-	logID, err := uuid.Parse(res.LogId)
+	logID, err := uuid.Parse(res.Msg.LogId)
 	if err != nil {
 		return nil, err
 	}

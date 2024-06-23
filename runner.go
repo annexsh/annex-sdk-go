@@ -4,32 +4,35 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
+	"time"
 
-	testservicev1 "github.com/annexsh/annex-proto/gen/go/rpc/testservice/v1"
-	testv1 "github.com/annexsh/annex-proto/gen/go/type/test/v1"
+	"connectrpc.com/connect"
+	testsv1 "github.com/annexsh/annex-proto/gen/go/annex/tests/v1"
+	"github.com/annexsh/annex-proto/gen/go/annex/tests/v1/testsv1connect"
 	"github.com/denisbrodbeck/machineid"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/interceptor"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/annexsh/annex-sdk-go/internal/temporal"
 )
 
 const (
-	runnerContext = "default" // TODO: configurable
-	runnerGroup   = "default" // TODO: configurable
+	runnerContext = "default"         // TODO: configurable
+	runnerGroup   = "default"         // TODO: configurable
+	annexHostPort = "127.0.0.1:50051" // TODO: configurable
+	connectAPIURL = "http://" + annexHostPort + "/connect"
 )
 
 type Runner struct {
 	id              string
 	client          client.Client
 	base            worker.Worker
-	annex           testservicev1.TestServiceClient
+	testClient      testsv1connect.TestServiceClient
 	ctx             context.Context
 	registeredTests []registeredTest
 }
@@ -37,24 +40,19 @@ type Runner struct {
 func NewRunner() (*Runner, error) {
 	ctx := context.Background()
 
-	annexAddr := "127.0.0.1:50051" // TODO: configurable
-
-	conn, err := grpc.DialContext(ctx, annexAddr,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	testClient := testsv1connect.NewTestServiceClient(
+		&http.Client{Timeout: time.Minute},
+		connectAPIURL,
 	)
-	if err != nil {
-		return nil, err
-	}
-	annexClient := testservicev1.NewTestServiceClient(conn)
 
-	if _, err = annexClient.RegisterGroup(ctx, &testservicev1.RegisterGroupRequest{
+	if _, err := testClient.RegisterGroup(ctx, connect.NewRequest(&testsv1.RegisterGroupRequest{
 		Context: runnerContext,
 		Name:    runnerGroup,
-	}); err != nil {
+	})); err != nil {
 		return nil, err
 	}
 
-	temporalClient, err := temporal.NewClient(ctx, annexAddr, runnerContext)
+	temporalClient, err := temporal.NewClient(ctx, annexHostPort, runnerContext)
 	if err != nil {
 		return nil, err
 	}
@@ -68,19 +66,19 @@ func NewRunner() (*Runner, error) {
 	base := worker.New(temporalClient, taskQueue, worker.Options{
 		DisableRegistrationAliasing: true,
 		Interceptors: []interceptor.WorkerInterceptor{
-			temporal.NewWorkerLogInterceptor(annexClient),
+			temporal.NewWorkerLogInterceptor(testClient),
 		},
 		Identity: id,
 	})
 
-	base.RegisterActivity(temporal.NewTestLogActivity(annexClient))
+	base.RegisterActivity(temporal.NewTestLogActivity(testClient))
 
 	return &Runner{
-		id:     id,
-		client: temporalClient,
-		base:   base,
-		annex:  annexClient,
-		ctx:    ctx,
+		id:         id,
+		client:     temporalClient,
+		base:       base,
+		testClient: testClient,
+		ctx:        ctx,
 	}, nil
 }
 
@@ -114,14 +112,14 @@ func RegisterInputCase[P any](runner *Runner, caseFn func(t CaseT, param P)) {
 }
 
 func (w *Runner) Run() error {
-	var defs []*testv1.TestDefinition
+	var defs []*testsv1.TestDefinition
 
 	for _, reg := range w.registeredTests {
 		w.base.RegisterWorkflowWithOptions(reg.test.workflow, workflow.RegisterOptions{
 			Name: reg.name,
 		})
 
-		def := &testv1.TestDefinition{
+		def := &testsv1.TestDefinition{
 			Name:         reg.name,
 			DefaultInput: nil,
 		}
@@ -131,7 +129,7 @@ func (w *Runner) Run() error {
 			if err != nil {
 				return err
 			}
-			def.DefaultInput = &testv1.Payload{
+			def.DefaultInput = &testsv1.Payload{
 				Data: data,
 			}
 		}
@@ -139,17 +137,17 @@ func (w *Runner) Run() error {
 		defs = append(defs, def)
 	}
 
-	regRes, err := w.annex.RegisterTests(w.ctx, &testservicev1.RegisterTestsRequest{
+	regRes, err := w.testClient.RegisterTests(w.ctx, connect.NewRequest(&testsv1.RegisterTestsRequest{
 		Context:     runnerContext,
 		Group:       runnerGroup,
 		Definitions: defs,
-	})
+	}))
 	if err != nil {
 		return err
 	}
 
-	testIDs := make([]string, len(regRes.Tests))
-	for i, reg := range regRes.Tests {
+	testIDs := make([]string, len(regRes.Msg.Tests))
+	for i, reg := range regRes.Msg.Tests {
 		testIDs[i] = reg.Id
 	}
 
@@ -158,7 +156,7 @@ func (w *Runner) Run() error {
 }
 
 type tester interface {
-	workflow(ctx workflow.Context, payload *testv1.Payload) error
+	workflow(ctx workflow.Context, payload *testsv1.Payload) error
 	paramType() (bool, reflect.Type)
 }
 
