@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/annexsh/annex-proto/gen/go/annex/tests/v1"
+	"github.com/annexsh/annex-proto/go/gen/annex/tests/v1"
 	"github.com/annexsh/annex/test"
 	"github.com/google/uuid"
 	"go.temporal.io/sdk/activity"
@@ -81,10 +81,10 @@ func (l *Logger) log(level Level, msg string, keyvals ...any) {
 var _ tlog.Logger = (*TestActivityLogger)(nil)
 
 type LogPublisher interface {
-	PublishTestExecutionLog(
+	PublishLog(
 		ctx context.Context,
-		req *connect.Request[testsv1.PublishTestExecutionLogRequest],
-	) (*connect.Response[testsv1.PublishTestExecutionLogResponse], error)
+		req *connect.Request[testsv1.PublishLogRequest],
+	) (*connect.Response[testsv1.PublishLogResponse], error)
 }
 
 type CaseOption func(logger *TestActivityLogger)
@@ -133,7 +133,7 @@ func (l *TestActivityLogger) Error(msg string, keyvals ...any) {
 
 func (l *TestActivityLogger) log(level Level, msg string, keyvals []any) {
 	if !l.testExecID.IsEmpty() {
-		req := &testsv1.PublishTestExecutionLogRequest{
+		req := &testsv1.PublishLogRequest{
 			TestExecutionId: l.testExecID.String(),
 			CaseExecutionId: nil,
 			Level:           string(level),
@@ -148,7 +148,7 @@ func (l *TestActivityLogger) log(level Level, msg string, keyvals []any) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), logRequestTimeout)
 		defer cancel()
-		if _, err := l.pub.PublishTestExecutionLog(ctx, connect.NewRequest(req)); err != nil {
+		if _, err := l.pub.PublishLog(ctx, connect.NewRequest(req)); err != nil {
 			kv := append(keyvals, "error", err)
 			l.Logger.Error("failed to publish log", kv...)
 		}
@@ -189,14 +189,14 @@ func (t *TestLogActivity) Publish(ctx context.Context, req TestLogRequest) (*Tes
 
 	keyVals := req.GlobalKeyVals + strings.TrimSuffix(fmt.Sprintln(req.KeyVals...), "\n")
 
-	pubReq := &testsv1.PublishTestExecutionLogRequest{
+	pubReq := &testsv1.PublishLogRequest{
 		TestExecutionId: req.TestExecutionID.String(),
 		Level:           string(req.Level),
 		Message:         req.Message + " " + keyVals,
 		CreateTime:      timestamppb.New(time.Now().UTC()),
 	}
 
-	res, err := t.pub.PublishTestExecutionLog(ctx, connect.NewRequest(pubReq))
+	res, err := t.pub.PublishLog(ctx, connect.NewRequest(pubReq))
 	if err != nil {
 		kv := append(req.KeyVals, "error", err)
 		logger.Error("failed to publish test log", kv...)
