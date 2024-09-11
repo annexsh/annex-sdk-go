@@ -4,10 +4,10 @@ go 1.22.0
 
 require (
 	connectrpc.com/connect v1.16.2
-	github.com/annexsh/annex v0.0.0-20240808062911-d416e0fe82de
-	github.com/annexsh/annex-proto/go v0.0.0-20240808061753-dc30c5d27a31
+	github.com/MakeNowJust/heredoc/v2 v2.0.1
+	github.com/annexsh/annex v0.0.0-20241007124715-d59db97e76a4
+	github.com/annexsh/annex-proto/go v0.0.0-20241007123620-ae2c3f2c27fc
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.9.0
 	go.temporal.io/api v1.34.0

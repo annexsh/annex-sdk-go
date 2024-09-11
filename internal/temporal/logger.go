@@ -12,7 +12,6 @@ import (
 	"github.com/annexsh/annex-proto/go/gen/annex/tests/v1"
 	"github.com/annexsh/annex/test"
 	"github.com/google/uuid"
-	"go.temporal.io/sdk/activity"
 	tlog "go.temporal.io/sdk/log"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
@@ -132,8 +131,9 @@ func (l *TestActivityLogger) Error(msg string, keyvals ...any) {
 }
 
 func (l *TestActivityLogger) log(level Level, msg string, keyvals []any) {
-	if !l.testExecID.IsEmpty() {
+	if !l.testExecID.Empty() {
 		req := &testsv1.PublishLogRequest{
+			Context:         "default",
 			TestExecutionId: l.testExecID.String(),
 			CaseExecutionId: nil,
 			Level:           string(level),
@@ -185,11 +185,11 @@ func (t *TestLogActivity) Publish(ctx context.Context, req TestLogRequest) (*Tes
 	ctx = ContextWithTestLogConfig(ctx, TestLogConfig{
 		TestExecID: req.TestExecutionID,
 	})
-	logger := activity.GetLogger(ctx)
 
 	keyVals := req.GlobalKeyVals + strings.TrimSuffix(fmt.Sprintln(req.KeyVals...), "\n")
 
 	pubReq := &testsv1.PublishLogRequest{
+		Context:         "default",
 		TestExecutionId: req.TestExecutionID.String(),
 		Level:           string(req.Level),
 		Message:         req.Message + " " + keyVals,
@@ -198,8 +198,7 @@ func (t *TestLogActivity) Publish(ctx context.Context, req TestLogRequest) (*Tes
 
 	res, err := t.pub.PublishLog(ctx, connect.NewRequest(pubReq))
 	if err != nil {
-		kv := append(req.KeyVals, "error", err)
-		logger.Error("failed to publish test log", kv...)
+		return nil, err
 	}
 
 	logID, err := uuid.Parse(res.Msg.LogId)
