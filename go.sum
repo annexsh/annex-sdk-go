@@ -2,10 +2,10 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 connectrpc.com/connect v1.16.2 h1:ybd6y+ls7GOlb7Bh5C8+ghA6SvCBajHwxssO2CGFjqE=
 connectrpc.com/connect v1.16.2/go.mod h1:n2kgwskMHXC+lVqb18wngEpF95ldBHXjZYJussz5FRc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/annexsh/annex v0.0.0-20240808062911-d416e0fe82de h1:OC6rma+0YQ42Xt5aNylj5fJONld4Tjf3PVUt8sI5cSc=
-github.com/annexsh/annex v0.0.0-20240808062911-d416e0fe82de/go.mod h1:g+EJf23JTULj6PFe2enEfQSqES++a4pr18NjNWUy0mg=
-github.com/annexsh/annex-proto/go v0.0.0-20240808061753-dc30c5d27a31 h1:Ngs0NV0ue5Un60UGzZMC6XK6LKJXiOeYX7CdxOyyAmg=
-github.com/annexsh/annex-proto/go v0.0.0-20240808061753-dc30c5d27a31/go.mod h1:zoYeZbIV0vggcARZI1Zw7TfMZ8wwMqaGvqK+Hd2iMRY=
+github.com/annexsh/annex v0.0.0-20240911045028-01d67c378f23 h1:SRrpn9Hrh4slWEVQ12szfbPwFIYNbflwGGlKi8sDKnI=
+github.com/annexsh/annex v0.0.0-20240911045028-01d67c378f23/go.mod h1:DgODtYGmf04sviOiNlu4M2HfPRw9DIYGD3biBzswSFk=
+github.com/annexsh/annex-proto/go v0.0.0-20240911004546-a4e7d61cec64 h1:zmO/8QdKWgHtwPTTvbV2k7kT8xntXIRjU7mTbF7K58c=
+github.com/annexsh/annex-proto/go v0.0.0-20240911004546-a4e7d61cec64/go.mod h1:zoYeZbIV0vggcARZI1Zw7TfMZ8wwMqaGvqK+Hd2iMRY=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
@@ -16,8 +16,6 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/denisbrodbeck/machineid v1.0.1 h1:geKr9qtkB876mXguW2X6TU4ZynleN6ezuMSRhl4D7AQ=
-github.com/denisbrodbeck/machineid v1.0.1/go.mod h1:dJUwb7PTidGDeYyUBmXZ2GphQBbjJCrnectwCyxcUSI=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
