@@ -132,7 +132,7 @@ func (l *TestActivityLogger) Error(msg string, keyvals ...any) {
 }
 
 func (l *TestActivityLogger) log(level Level, msg string, keyvals []any) {
-	if !l.testExecID.IsEmpty() {
+	if !l.testExecID.Empty() {
 		req := &testsv1.PublishLogRequest{
 			TestExecutionId: l.testExecID.String(),
 			CaseExecutionId: nil,

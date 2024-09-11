@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"reflect"
 	"time"
 
 	"connectrpc.com/connect"
 	testsv1 "github.com/annexsh/annex-proto/go/gen/annex/tests/v1"
 	"github.com/annexsh/annex-proto/go/gen/annex/tests/v1/testsv1connect"
-	"github.com/denisbrodbeck/machineid"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/interceptor"
@@ -57,12 +57,9 @@ func NewRunner() (*Runner, error) {
 		return nil, err
 	}
 
-	id, err := machineid.ProtectedID("annex-runner")
-	if err != nil {
-		return nil, err
-	}
-
 	taskQueue := getTaskQueue(runnerContext, runnerGroup)
+	id := getRunnerIdentify(taskQueue)
+
 	base := worker.New(temporalClient, taskQueue, worker.Options{
 		DisableRegistrationAliasing: true,
 		Interceptors: []interceptor.WorkerInterceptor{
@@ -168,4 +165,16 @@ type registeredTest struct {
 
 func getTaskQueue(context string, groupName string) string {
 	return fmt.Sprintf("%s-%s", context, groupName)
+}
+
+func getRunnerIdentify(taskQueueName string) string {
+	return fmt.Sprintf("%d@%s@%s", os.Getpid(), getHostName(), taskQueueName)
+}
+
+func getHostName() string {
+	hostName, err := os.Hostname()
+	if err != nil {
+		hostName = "Unknown"
+	}
+	return hostName
 }
