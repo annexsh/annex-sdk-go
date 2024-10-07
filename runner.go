@@ -1,19 +1,25 @@
 package annex
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
+	"crypto/sha256"
+	"encoding/gob"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/MakeNowJust/heredoc/v2"
 	testsv1 "github.com/annexsh/annex-proto/go/gen/annex/tests/v1"
 	"github.com/annexsh/annex-proto/go/gen/annex/tests/v1/testsv1connect"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
+	"go.temporal.io/sdk/converter"
 	"go.temporal.io/sdk/interceptor"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
@@ -21,46 +27,54 @@ import (
 	"github.com/annexsh/annex-sdk-go/internal/temporal"
 )
 
-const (
-	runnerContext = "default"         // TODO: configurable
-	runnerGroup   = "default"         // TODO: configurable
-	annexHostPort = "127.0.0.1:50051" // TODO: configurable
-	connectAPIURL = "http://" + annexHostPort + "/connect"
-)
+type TestSuiteRunnerConfig struct {
+	HostPort      string
+	Context       string
+	TestSuiteName string
+	TestSuiteDesc string
+}
 
-type Runner struct {
-	id              string
-	client          client.Client
-	base            worker.Worker
-	testClient      testsv1connect.TestServiceClient
+type TestSuiteRunner struct {
 	ctx             context.Context
+	id              string
+	context         string
+	suiteID         string
+	client          client.Client
+	worker          worker.Worker
+	testClient      testsv1connect.TestServiceClient
 	registeredTests []registeredTest
 }
 
-func NewRunner() (*Runner, error) {
+func NewTestSuiteRunner(cfg TestSuiteRunnerConfig) (*TestSuiteRunner, error) {
 	ctx := context.Background()
 
-	testClient := testsv1connect.NewTestServiceClient(
-		&http.Client{Timeout: time.Minute},
-		connectAPIURL,
-	)
+	httpc := &http.Client{Timeout: time.Minute}
 
-	if _, err := testClient.RegisterGroup(ctx, connect.NewRequest(&testsv1.RegisterGroupRequest{
-		Context: runnerContext,
-		Name:    runnerGroup,
-	})); err != nil {
-		return nil, err
-	}
+	connectURL := "http://" + cfg.HostPort + "/connect"
+	testClient := testsv1connect.NewTestServiceClient(httpc, connectURL)
 
-	temporalClient, err := temporal.NewClient(ctx, annexHostPort, runnerContext)
+	temporalClient, err := temporal.NewClient(ctx, cfg.HostPort, cfg.Context)
 	if err != nil {
 		return nil, err
 	}
 
-	taskQueue := getTaskQueue(runnerContext, runnerGroup)
+	suiteReq := &testsv1.RegisterTestSuiteRequest{
+		Context: cfg.Context,
+		Name:    cfg.TestSuiteName,
+	}
+	if strings.TrimSpace(cfg.TestSuiteDesc) != "" {
+		desc := heredoc.Doc(cfg.TestSuiteDesc)
+		suiteReq.Description = &desc
+	}
+	suiteRes, err := testClient.RegisterTestSuite(ctx, connect.NewRequest(suiteReq))
+	if err != nil {
+		return nil, err
+	}
+
+	taskQueue := getTaskQueue(cfg.Context, suiteRes.Msg.Id)
 	id := getRunnerIdentify(taskQueue)
 
-	base := worker.New(temporalClient, taskQueue, worker.Options{
+	wrk := worker.New(temporalClient, taskQueue, worker.Options{
 		DisableRegistrationAliasing: true,
 		Interceptors: []interceptor.WorkerInterceptor{
 			temporal.NewWorkerLogInterceptor(testClient),
@@ -68,25 +82,27 @@ func NewRunner() (*Runner, error) {
 		Identity: id,
 	})
 
-	base.RegisterActivity(temporal.NewTestLogActivity(testClient))
+	wrk.RegisterActivity(temporal.NewTestLogActivity(testClient))
 
-	return &Runner{
-		id:         id,
-		client:     temporalClient,
-		base:       base,
-		testClient: testClient,
+	return &TestSuiteRunner{
 		ctx:        ctx,
+		id:         id,
+		context:    cfg.Context,
+		suiteID:    suiteRes.Msg.Id,
+		client:     temporalClient,
+		worker:     wrk,
+		testClient: testClient,
 	}, nil
 }
 
-func RegisterTest(runner *Runner, name string, test func(t TestT)) {
+func RegisterTest(runner *TestSuiteRunner, name string, test func(t TestT)) {
 	runner.registeredTests = append(runner.registeredTests, registeredTest{
 		name: name,
 		test: &simpleTest{test: test},
 	})
 }
 
-func RegisterInputTest[P any](runner *Runner, name string, test func(ctx TestT, param P)) {
+func RegisterInputTest[P any](runner *TestSuiteRunner, name string, test func(t TestT, param P)) {
 	runner.registeredTests = append(runner.registeredTests, registeredTest{
 		name:         name,
 		test:         &paramTest[P]{test: test},
@@ -94,25 +110,25 @@ func RegisterInputTest[P any](runner *Runner, name string, test func(ctx TestT, 
 	})
 }
 
-func RegisterCase(runner *Runner, caseFn func(t CaseT)) {
+func RegisterCase(runner *TestSuiteRunner, caseFn func(t CaseT)) {
 	c := simpleCase{caseFn: caseFn}
-	runner.base.RegisterActivityWithOptions(c.activity, activity.RegisterOptions{
+	runner.worker.RegisterActivityWithOptions(c.activity, activity.RegisterOptions{
 		Name: c.name(),
 	})
 }
 
-func RegisterInputCase[P any](runner *Runner, caseFn func(t CaseT, param P)) {
+func RegisterInputCase[P any](runner *TestSuiteRunner, caseFn func(t CaseT, param P)) {
 	c := paramCase[P]{caseFn: caseFn}
-	runner.base.RegisterActivityWithOptions(c.activity, activity.RegisterOptions{
+	runner.worker.RegisterActivityWithOptions(c.activity, activity.RegisterOptions{
 		Name: c.name(),
 	})
 }
 
-func (w *Runner) Run() error {
+func (w *TestSuiteRunner) Run() error {
 	var defs []*testsv1.TestDefinition
 
 	for _, reg := range w.registeredTests {
-		w.base.RegisterWorkflowWithOptions(reg.test.workflow, workflow.RegisterOptions{
+		w.worker.RegisterWorkflowWithOptions(reg.test.workflow, workflow.RegisterOptions{
 			Name: reg.name,
 		})
 
@@ -122,34 +138,43 @@ func (w *Runner) Run() error {
 		}
 
 		if reg.defaultParam != nil {
-			data, err := json.Marshal(reg.defaultParam)
+			p, err := converter.NewJSONPayloadConverter().ToPayload(reg.defaultParam)
 			if err != nil {
 				return err
 			}
 			def.DefaultInput = &testsv1.Payload{
-				Data: data,
+				Data:     p.Data,
+				Metadata: p.Metadata,
 			}
 		}
 
 		defs = append(defs, def)
 	}
 
-	regRes, err := w.testClient.RegisterTests(w.ctx, connect.NewRequest(&testsv1.RegisterTestsRequest{
-		Context:     runnerContext,
-		Group:       runnerGroup,
-		Definitions: defs,
-	}))
+	version, err := getTestSuiteVersion(defs)
 	if err != nil {
 		return err
 	}
 
-	testIDs := make([]string, len(regRes.Msg.Tests))
-	for i, reg := range regRes.Msg.Tests {
-		testIDs[i] = reg.Id
+	stream := w.testClient.RegisterTests(w.ctx)
+
+	for _, def := range defs {
+		if err = stream.Send(&testsv1.RegisterTestsRequest{
+			Context:     w.context,
+			TestSuiteId: w.suiteID,
+			Definition:  def,
+			Version:     version,
+			RunnerId:    w.id,
+		}); err != nil {
+			return err
+		}
 	}
 
-	err = w.base.Run(worker.InterruptCh())
-	return err
+	if _, err = stream.CloseAndReceive(); err != nil {
+		return err
+	}
+
+	return w.worker.Run(worker.InterruptCh())
 }
 
 type tester interface {
@@ -163,8 +188,8 @@ type registeredTest struct {
 	defaultParam any
 }
 
-func getTaskQueue(context string, groupName string) string {
-	return fmt.Sprintf("%s-%s", context, groupName)
+func getTaskQueue(context string, suiteID string) string {
+	return fmt.Sprintf("%s-%s", context, suiteID)
 }
 
 func getRunnerIdentify(taskQueueName string) string {
@@ -177,4 +202,15 @@ func getHostName() string {
 		hostName = "Unknown"
 	}
 	return hostName
+}
+
+func getTestSuiteVersion(defs []*testsv1.TestDefinition) (string, error) {
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+	if err := encoder.Encode(defs); err != nil {
+		return "", err
+	}
+
+	hash := sha256.Sum256(buffer.Bytes())
+	return hex.EncodeToString(hash[:]), nil
 }

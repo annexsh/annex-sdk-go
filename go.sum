@@ -2,10 +2,12 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 connectrpc.com/connect v1.16.2 h1:ybd6y+ls7GOlb7Bh5C8+ghA6SvCBajHwxssO2CGFjqE=
 connectrpc.com/connect v1.16.2/go.mod h1:n2kgwskMHXC+lVqb18wngEpF95ldBHXjZYJussz5FRc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/annexsh/annex v0.0.0-20240911045028-01d67c378f23 h1:SRrpn9Hrh4slWEVQ12szfbPwFIYNbflwGGlKi8sDKnI=
-github.com/annexsh/annex v0.0.0-20240911045028-01d67c378f23/go.mod h1:DgODtYGmf04sviOiNlu4M2HfPRw9DIYGD3biBzswSFk=
-github.com/annexsh/annex-proto/go v0.0.0-20240911004546-a4e7d61cec64 h1:zmO/8QdKWgHtwPTTvbV2k7kT8xntXIRjU7mTbF7K58c=
-github.com/annexsh/annex-proto/go v0.0.0-20240911004546-a4e7d61cec64/go.mod h1:zoYeZbIV0vggcARZI1Zw7TfMZ8wwMqaGvqK+Hd2iMRY=
+github.com/MakeNowJust/heredoc/v2 v2.0.1 h1:rlCHh70XXXv7toz95ajQWOWQnN4WNLt0TdpZYIR/J6A=
+github.com/MakeNowJust/heredoc/v2 v2.0.1/go.mod h1:6/2Abh5s+hc3g9nbWLe9ObDIOhaRrqsyY9MWy+4JdRM=
+github.com/annexsh/annex v0.0.0-20241007124715-d59db97e76a4 h1:FoZ7PQpr73/0wXbSwfYkOA+59xEsyc/bLweUQHL3IMA=
+github.com/annexsh/annex v0.0.0-20241007124715-d59db97e76a4/go.mod h1:oaLRBmxGv5GhtLvCZ3Bj1LJVcwzca05N+Grd4WqxVuQ=
+github.com/annexsh/annex-proto/go v0.0.0-20241007123620-ae2c3f2c27fc h1:aWOrrwrX6/grooOv0ij+O3y277b/PH5U0UF/h9Bi4f0=
+github.com/annexsh/annex-proto/go v0.0.0-20241007123620-ae2c3f2c27fc/go.mod h1:zoYeZbIV0vggcARZI1Zw7TfMZ8wwMqaGvqK+Hd2iMRY=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
