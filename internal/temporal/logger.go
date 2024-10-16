@@ -3,13 +3,13 @@ package temporal
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
+	"log/slog"
 	"strings"
 	"time"
 
 	"connectrpc.com/connect"
 	"github.com/annexsh/annex-proto/go/gen/annex/tests/v1"
+	"github.com/annexsh/annex/log"
 	"github.com/annexsh/annex/test"
 	"github.com/google/uuid"
 	tlog "go.temporal.io/sdk/log"
@@ -22,6 +22,21 @@ const logRequestTimeout = 5 * time.Second
 
 type Level string
 
+func (l Level) SlogLevel() slog.Level {
+	switch l {
+	case LevelDebug:
+		return slog.LevelDebug
+	case LevelInfo:
+		return slog.LevelInfo
+	case LevelWarn:
+		return slog.LevelWarn
+	case LevelError:
+		return slog.LevelError
+	default:
+		panic(fmt.Sprintf("unknown level: %v", l))
+	}
+}
+
 const (
 	LevelDebug Level = "DEBUG"
 	LevelInfo  Level = "INFO"
@@ -30,30 +45,30 @@ const (
 )
 
 type Logger struct {
-	logger        *log.Logger
+	logger        log.Logger
 	globalKeyvals string
 }
 
-func NewLogger() *Logger {
+func FromLogger(base log.Logger) *Logger {
 	return &Logger{
-		logger: log.New(os.Stdout, "", log.LstdFlags),
+		logger: base,
 	}
 }
 
 func (l *Logger) Debug(msg string, keyvals ...any) {
-	l.log(LevelDebug, msg, keyvals)
+	l.log(LevelDebug, msg, keyvals...)
 }
 
 func (l *Logger) Info(msg string, keyvals ...any) {
-	l.log(LevelInfo, msg, keyvals)
+	l.log(LevelInfo, msg, keyvals...)
 }
 
 func (l *Logger) Warn(msg string, keyvals ...any) {
-	l.log(LevelWarn, msg, keyvals)
+	l.log(LevelWarn, msg, keyvals...)
 }
 
 func (l *Logger) Error(msg string, keyvals ...any) {
-	l.log(LevelError, msg, keyvals)
+	l.log(LevelError, msg, keyvals...)
 }
 
 // With returns new logger the prepend every log entry with keyvals.
@@ -69,11 +84,10 @@ func (l *Logger) With(keyvals ...any) tlog.Logger {
 }
 
 func (l *Logger) log(level Level, msg string, keyvals ...any) {
-	// To avoid extra space when globalKeyvals is not specified.
 	if l.globalKeyvals == "" {
-		l.logger.Println(append([]any{level, msg}, keyvals...)...)
+		l.logger.Log(context.Background(), level.SlogLevel(), msg, keyvals...)
 	} else {
-		l.logger.Println(append([]any{level, msg, l.globalKeyvals}, keyvals...)...)
+		l.logger.Log(context.Background(), level.SlogLevel(), msg, keyvals...)
 	}
 }
 
@@ -102,16 +116,16 @@ type TestActivityLogger struct {
 	caseExecID    *test.CaseExecutionID
 }
 
-func NewTestActivityLogger(pub LogPublisher, testExecID test.TestExecutionID, opts ...CaseOption) *TestActivityLogger {
-	logger := &TestActivityLogger{
-		Logger:     NewLogger(),
+func NewTestActivityLogger(logger log.Logger, pub LogPublisher, testExecID test.TestExecutionID, opts ...CaseOption) *TestActivityLogger {
+	activityLogger := &TestActivityLogger{
+		Logger:     FromLogger(logger),
 		pub:        pub,
 		testExecID: testExecID,
 	}
 	for _, opt := range opts {
-		opt(logger)
+		opt(activityLogger)
 	}
-	return logger
+	return activityLogger
 }
 
 func (l *TestActivityLogger) Debug(msg string, keyvals ...any) {
@@ -131,6 +145,8 @@ func (l *TestActivityLogger) Error(msg string, keyvals ...any) {
 }
 
 func (l *TestActivityLogger) log(level Level, msg string, keyvals []any) {
+	keyvals = append(keyvals, "test_execution.id", l.testExecID.String())
+
 	if !l.testExecID.Empty() {
 		req := &testsv1.PublishLogRequest{
 			Context:         "default",
@@ -144,6 +160,7 @@ func (l *TestActivityLogger) log(level Level, msg string, keyvals []any) {
 		if l.caseExecID != nil {
 			cid32 := l.caseExecID.Int32()
 			req.CaseExecutionId = &cid32
+			keyvals = append(keyvals, "case_execution.id", l.caseExecID.String())
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), logRequestTimeout)
@@ -218,9 +235,9 @@ type TestWorkflowLogger struct {
 	testExecID test.TestExecutionID
 }
 
-func NewTestWorkflowLogger(ctx workflow.Context, testExecID test.TestExecutionID) *TestWorkflowLogger {
+func NewTestWorkflowLogger(ctx workflow.Context, logger log.Logger, testExecID test.TestExecutionID) *TestWorkflowLogger {
 	return &TestWorkflowLogger{
-		Logger: NewLogger(),
+		Logger: FromLogger(logger),
 		ctx: workflow.WithLocalActivityOptions(ctx, workflow.LocalActivityOptions{
 			// local activity requires short start to close timeout
 			StartToCloseTimeout: logRequestTimeout + (100 * time.Millisecond),
@@ -250,7 +267,7 @@ func (l *TestWorkflowLogger) Error(msg string, keyvals ...any) {
 }
 
 func (l *TestWorkflowLogger) log(level Level, msg string, keyvals ...any) {
-	keyvals = append(keyvals, l.globalKeyvals)
+	keyvals = append(keyvals, "test_execution.id", l.testExecID.String())
 	request := TestLogRequest{
 		Level:           level,
 		Message:         msg,
