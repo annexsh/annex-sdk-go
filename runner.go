@@ -17,6 +17,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	testsv1 "github.com/annexsh/annex-proto/go/gen/annex/tests/v1"
 	"github.com/annexsh/annex-proto/go/gen/annex/tests/v1/testsv1connect"
+	"github.com/annexsh/annex/log"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/converter"
@@ -31,7 +32,8 @@ type TestSuiteRunnerConfig struct {
 	HostPort      string
 	Context       string
 	TestSuiteName string
-	TestSuiteDesc string
+	TestSuiteDesc string     // optional
+	Logger        log.Logger // optional
 }
 
 type TestSuiteRunner struct {
@@ -48,12 +50,17 @@ type TestSuiteRunner struct {
 func NewTestSuiteRunner(cfg TestSuiteRunnerConfig) (*TestSuiteRunner, error) {
 	ctx := context.Background()
 
+	logger := cfg.Logger
+	if logger == nil {
+		logger = log.NewLogger()
+	}
+
 	httpc := &http.Client{Timeout: time.Minute}
 
 	connectURL := "http://" + cfg.HostPort + "/connect"
 	testClient := testsv1connect.NewTestServiceClient(httpc, connectURL)
 
-	temporalClient, err := temporal.NewClient(ctx, cfg.HostPort, cfg.Context)
+	temporalClient, err := temporal.NewClient(ctx, logger, cfg.HostPort, cfg.Context)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +84,7 @@ func NewTestSuiteRunner(cfg TestSuiteRunnerConfig) (*TestSuiteRunner, error) {
 	wrk := worker.New(temporalClient, taskQueue, worker.Options{
 		DisableRegistrationAliasing: true,
 		Interceptors: []interceptor.WorkerInterceptor{
-			temporal.NewWorkerLogInterceptor(testClient),
+			temporal.NewWorkerLogInterceptor(logger, testClient),
 		},
 		Identity: id,
 	})

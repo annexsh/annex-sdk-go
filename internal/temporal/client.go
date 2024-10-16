@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/annexsh/annex/log"
 	"github.com/cenkalti/backoff/v4"
 	"go.temporal.io/api/workflowservice/v1"
 	"go.temporal.io/sdk/client"
@@ -13,7 +14,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func NewClient(ctx context.Context, hostPort string, namespace string) (client.Client, error) {
+func NewClient(ctx context.Context, logger log.Logger, hostPort string, namespace string) (client.Client, error) {
 	c, err := client.NewLazyClient(client.Options{
 		HostPort:      hostPort,
 		Namespace:     namespace,
@@ -21,7 +22,7 @@ func NewClient(ctx context.Context, hostPort string, namespace string) (client.C
 		ConnectionOptions: client.ConnectionOptions{
 			DialOptions: []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
 		},
-		Logger: NewLogger(),
+		Logger: FromLogger(logger),
 	})
 	if err != nil {
 		return nil, err
